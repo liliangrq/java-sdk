@@ -10,9 +10,11 @@ import com.binance.dex.api.client.encoding.EncodeUtils;
 import com.binance.dex.api.proto.StdSignature;
 import com.binance.dex.api.proto.StdTx;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.ByteString;
 import okhttp3.RequestBody;
+import org.apache.commons.lang3.ObjectUtils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -72,6 +74,18 @@ public class TransactionRequestAssembler {
                 stdSignature.toByteArray(), MessageType.StdSignature.getTypePrefixBytes(), false);
     }
 
+    @VisibleForTesting
+    byte[] encodeSignatureWithNoPubkey(byte[] signatureBytes) throws IOException {
+        byte[] Pubkey ={};
+        StdSignature stdSignature = StdSignature.newBuilder().setPubKey(ByteString.copyFrom(Pubkey))
+                .setSignature(ByteString.copyFrom(signatureBytes))
+                .setAccountNumber(wallet.getAccountNumber())
+                .setSequence(wallet.getSequence())
+                .build();
+
+        return EncodeUtils.aminoWrap(
+                stdSignature.toByteArray(), MessageType.StdSignature.getTypePrefixBytes(), false);
+    }
     @VisibleForTesting
     byte[] encodeStdTx(byte[] msg, byte[] signature) throws IOException {
         StdTx.Builder stdTxBuilder = StdTx.newBuilder()
@@ -232,6 +246,23 @@ public class TransactionRequestAssembler {
         TransferMessage msgBean = createTransferMessage(transfer);
         byte[] msg = encodeTransferMessage(msgBean);
         byte[] signature = encodeSignature(sign(msgBean));
+        byte[] stdTx = encodeStdTx(msg, signature);
+        return createRequestBody(stdTx);
+    }
+
+    public RequestBody buildTransferWithNoPubkey(Transfer transfer)
+            throws IOException, NoSuchAlgorithmException {
+        TransferMessage msgBean = createTransferMessage(transfer);
+        byte[] msg = encodeTransferMessage(msgBean);
+        byte[] signature = encodeSignatureWithNoPubkey(sign(msgBean));
+        byte[] stdTx = encodeStdTx(msg, signature);
+        return createRequestBody(stdTx);
+    }
+    public RequestBody buildTransferWithNoSign(Transfer transfer)
+            throws IOException, NoSuchAlgorithmException {
+        TransferMessage msgBean = createTransferMessage(transfer);
+        byte[] msg = encodeTransferMessage(msgBean);
+        byte[] signature = {};
         byte[] stdTx = encodeStdTx(msg, signature);
         return createRequestBody(stdTx);
     }

@@ -18,7 +18,7 @@ import java.util.List;
 public class BroadcastExample {
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
         Wallet wallet =
-                new Wallet("0f652de68eb8048951c753303f6a3a22114ff7d4418ecbe1711d5d6a02b50522",
+                new Wallet("29d1f25e20f715579a4bc9f7d05bf85507abc5a24919e4114111fa3fc19b86ef",
                         BinanceDexEnvironment.TEST_NET);
         BinanceDexApiRestClient client =
                 BinanceDexApiClientFactory.newInstance().newRestClient(BinanceDexEnvironment.TEST_NET.getBaseUrl());

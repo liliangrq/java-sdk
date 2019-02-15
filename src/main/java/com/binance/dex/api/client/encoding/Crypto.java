@@ -1,5 +1,6 @@
 package com.binance.dex.api.client.encoding;
 
+import org.bitcoinj.core.Bech32;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Utils;

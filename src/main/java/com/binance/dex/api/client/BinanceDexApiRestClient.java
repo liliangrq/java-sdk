@@ -65,6 +65,12 @@ public interface BinanceDexApiRestClient {
     List<TransactionMetadata> transfer(Transfer transfer, Wallet wallet, TransactionOption options, boolean sync)
             throws IOException, NoSuchAlgorithmException;
 
+    List<TransactionMetadata> transferWithNoSign(Transfer transfer, Wallet wallet, TransactionOption options, boolean sync)
+            throws IOException, NoSuchAlgorithmException;
+
+    List<TransactionMetadata> transferWithNoPubkey(Transfer transfer, Wallet wallet, TransactionOption options, boolean sync)
+            throws IOException, NoSuchAlgorithmException;
+
     List<TransactionMetadata> freeze(TokenFreeze freeze, Wallet wallet, TransactionOption options, boolean sync)
             throws IOException, NoSuchAlgorithmException;
 

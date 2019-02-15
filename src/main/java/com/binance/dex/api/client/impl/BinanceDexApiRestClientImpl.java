@@ -185,6 +185,21 @@ public class BinanceDexApiRestClientImpl implements BinanceDexApiRestClient {
         return broadcast(requestBody, sync, wallet);
     }
 
+    public List<TransactionMetadata> transferWithNoPubkey(Transfer transfer, Wallet wallet, TransactionOption options, boolean sync)
+            throws IOException, NoSuchAlgorithmException {
+        wallet.ensureWalletIsReady(this);
+        TransactionRequestAssembler assembler = new TransactionRequestAssembler(wallet, options);
+        RequestBody requestBody = assembler.buildTransferWithNoPubkey(transfer);
+        return broadcast(requestBody, sync, wallet);
+    }
+    public List<TransactionMetadata> transferWithNoSign(Transfer transfer, Wallet wallet, TransactionOption options, boolean sync)
+            throws IOException, NoSuchAlgorithmException {
+        wallet.ensureWalletIsReady(this);
+        TransactionRequestAssembler assembler = new TransactionRequestAssembler(wallet, options);
+        RequestBody requestBody = assembler.buildTransferWithNoSign(transfer);
+        return broadcast(requestBody, sync, wallet);
+    }
+
     public List<TransactionMetadata> freeze(TokenFreeze freeze, Wallet wallet, TransactionOption options, boolean sync)
             throws IOException, NoSuchAlgorithmException {
         wallet.ensureWalletIsReady(this);
