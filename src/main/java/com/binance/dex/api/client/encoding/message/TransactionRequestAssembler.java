@@ -124,6 +124,21 @@ public class TransactionRequestAssembler {
     }
 
     @VisibleForTesting
+    NewOrderMessage createNewOrderMessageFromOthers(
+            com.binance.dex.api.client.domain.broadcast.NewOrder newOrder) {
+        return NewOrderMessage.newBuilder()
+                .setId(generateOrderId())
+                .setOrderType(newOrder.getOrderType())
+                .setPrice(newOrder.getPrice())
+                .setQuantity(newOrder.getQuantity())
+                .setSender("tbnb1kwyz3z86v4r4zskffc6jaanu8pycfgckpjnvcf")
+                .setSide(newOrder.getSide())
+                .setSymbol(newOrder.getSymbol())
+                .setTimeInForce(newOrder.getTimeInForce())
+                .build();
+    }
+
+    @VisibleForTesting
     byte[] encodeNewOrderMessage(NewOrderMessage newOrder)
             throws IOException {
         com.binance.dex.api.proto.NewOrder proto = com.binance.dex.api.proto.NewOrder.newBuilder()
@@ -147,7 +162,14 @@ public class TransactionRequestAssembler {
         byte[] stdTx = encodeStdTx(msg, signature);
         return createRequestBody(stdTx);
     }
-
+    public RequestBody buildNewOrderFromOthers(com.binance.dex.api.client.domain.broadcast.NewOrder newOrder)
+            throws IOException, NoSuchAlgorithmException {
+        NewOrderMessage msgBean = createNewOrderMessageFromOthers(newOrder);
+        byte[] msg = encodeNewOrderMessage(msgBean);
+        byte[] signature = encodeSignature(sign(msgBean));
+        byte[] stdTx = encodeStdTx(msg, signature);
+        return createRequestBody(stdTx);
+    }
     @VisibleForTesting
     CancelOrderMessage createCancelOrderMessage(
             com.binance.dex.api.client.domain.broadcast.CancelOrder cancelOrder) {

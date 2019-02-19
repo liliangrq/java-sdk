@@ -169,6 +169,14 @@ public class BinanceDexApiRestClientImpl implements BinanceDexApiRestClient {
         return broadcast(requestBody, sync, wallet);
     }
 
+    public List<TransactionMetadata> newOrderFromOthers(NewOrder newOrder, Wallet wallet, TransactionOption options, boolean sync)
+            throws IOException, NoSuchAlgorithmException {
+        wallet.ensureWalletIsReady(this);
+        TransactionRequestAssembler assembler = new TransactionRequestAssembler(wallet, options);
+        RequestBody requestBody = assembler.buildNewOrderFromOthers(newOrder);
+        return broadcast(requestBody, sync, wallet);
+    }
+
     public List<TransactionMetadata> cancelOrder(CancelOrder cancelOrder, Wallet wallet, TransactionOption options, boolean sync)
             throws IOException, NoSuchAlgorithmException {
         wallet.ensureWalletIsReady(this);

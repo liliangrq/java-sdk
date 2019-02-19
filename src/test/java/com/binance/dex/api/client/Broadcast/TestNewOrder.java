@@ -27,6 +27,29 @@ public class TestNewOrder {
     Wallet toWallet = new Wallet("1bb30cb486f610f6bd6c8b8f7cbdce9e2d37e716e2cb7b82669330c5b126a574",
             BinanceDexEnvironment.TEST_NET);
 
+    @Test
+    public void testNewOrder() throws IOException, NoSuchAlgorithmException{
+        String symbol = "ADA.B-F2F_BNB";
+
+        NewOrder no = new NewOrder();
+        no.setTimeInForce(TimeInForce.GTE);
+        no.setOrderType(OrderType.LIMIT);
+        no.setSide(OrderSide.BUY);
+        no.setPrice("0.0042");
+        no.setQuantity("1.0");
+        no.setSymbol(symbol);
+        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
+
+        try {
+            List<TransactionMetadata> resp = client.newOrder(no, wallet, options, true);
+            logger.info(resp.get(0));
+
+        }catch  (BinanceDexApiException e) {
+            logger.warn(e.getError());
+            throw e;
+        }
+    }
+
     @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*Quantity:Zero/Negative Number.*")
     public void testNewOrderNegativeNumber() throws IOException, NoSuchAlgorithmException{
         String symbol = "ADA.B-F2F_BNB";
@@ -192,9 +215,7 @@ public class TestNewOrder {
             throw e;
         }
     }
-    //todo
-//    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*do not have enough token to lock.*")
-    @Test
+    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*signature verification failed.*")
     public void testNewOrderFromOthers() throws IOException, NoSuchAlgorithmException{
 
         String symbol = "ADA.B-F2F_BNB";
@@ -204,13 +225,13 @@ public class TestNewOrder {
         no.setOrderType(OrderType.LIMIT);
         no.setSide(OrderSide.BUY);
         no.setPrice("0.0042");
-        no.setQuantity("12");
+        no.setQuantity("1");
         no.setSymbol(symbol);
 
         TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
         try {
-            List<TransactionMetadata> resp = client.newOrder(no, wallet, options, true);
-            logger.info(resp.get(0));
+            List<TransactionMetadata> resp = client.newOrderFromOthers(no, wallet,options, true);
+            System.out.println(resp.get(0));
 
         }catch  (BinanceDexApiException e) {
             logger.warn(e.getError());
@@ -228,12 +249,12 @@ public class TestNewOrder {
         no.setOrderType(OrderType.LIMIT);
         no.setSide(OrderSide.SELL);
         no.setPrice("0.0042");
-        no.setQuantity("120");
+        no.setQuantity("1035");
         no.setSymbol(symbol);
 
         TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
         try {
-            List<TransactionMetadata> resp = client.newOrder(no, toWallet, options, true);
+            List<TransactionMetadata> resp = client.newOrder(no, wallet, options, true);
             logger.info(resp.get(0));
 
         }catch  (BinanceDexApiException e) {
@@ -289,4 +310,33 @@ public class TestNewOrder {
             throw e;
         }
     }
+
+    @Test
+    public void testTradeWithOneself() throws IOException, NoSuchAlgorithmException{
+
+        String symbol = "ADA.B-F2F_BNB";
+
+        NewOrder no = new NewOrder();
+        no.setTimeInForce(TimeInForce.GTE);
+        no.setOrderType(OrderType.LIMIT);
+        no.setPrice("0.0046");
+        no.setQuantity("1");
+        no.setSymbol(symbol);
+
+        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
+        try {
+            no.setSide(OrderSide.BUY);
+            List<TransactionMetadata> buyResp = client.newOrder(no, wallet, options, true);
+            logger.info(buyResp.get(0));
+            no.setSide(OrderSide.SELL);
+            List<TransactionMetadata> sellResp = client.newOrder(no, wallet, options, true);
+            logger.info(sellResp.get(0));
+
+        }catch  (BinanceDexApiException e) {
+            logger.warn(e.getError());
+            throw e;
+        }
+    }
+
+
 }

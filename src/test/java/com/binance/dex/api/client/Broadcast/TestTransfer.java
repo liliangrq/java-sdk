@@ -136,7 +136,7 @@ public class TestTransfer {
         transfer.setCoin(symbol);
         transfer.setFromAddress(wallet.getAddress());
         transfer.setToAddress(toAddress);
-        transfer.setAmount("3.0");
+        transfer.setAmount("1035.0");
         TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
 
         try {

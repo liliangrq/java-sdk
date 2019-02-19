@@ -9,7 +9,20 @@ import com.binance.dex.api.client.domain.broadcast.NewOrder;
 import com.binance.dex.api.client.domain.broadcast.TransactionOption;
 import org.testng.annotations.Test;
 import org.testng.log4testng.Logger;
+import com.binance.dex.api.client.BinanceDexApiClientFactory;
+import com.binance.dex.api.client.BinanceDexApiRestClient;
+import com.binance.dex.api.client.BinanceDexEnvironment;
+import com.binance.dex.api.client.Wallet;
+import com.binance.dex.api.client.domain.OrderSide;
+import com.binance.dex.api.client.domain.OrderType;
+import com.binance.dex.api.client.domain.TimeInForce;
+import com.binance.dex.api.client.domain.TransactionMetadata;
+import com.binance.dex.api.client.domain.broadcast.*;
+import org.junit.Ignore;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -24,266 +37,56 @@ public class TestCancelOrder {
     Wallet toWallet = new Wallet("1bb30cb486f610f6bd6c8b8f7cbdce9e2d37e716e2cb7b82669330c5b126a574",
             BinanceDexEnvironment.TEST_NET);
 
-    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*Quantity:Zero/Negative Number.*")
-    public void testNewOrderNegativeNumber() throws IOException, NoSuchAlgorithmException{
-        String symbol = "ADA.B-F2F_BNB";
-
-        NewOrder no = new NewOrder();
-        no.setTimeInForce(TimeInForce.GTE);
-        no.setOrderType(OrderType.LIMIT);
-        no.setSide(OrderSide.BUY);
-        no.setPrice("0.0042");
-        no.setQuantity("-1.0");
-        no.setSymbol(symbol);
-        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
-
-        try {
-            List<TransactionMetadata> resp = client.newOrder(no, wallet, options, true);
-            logger.info(resp.get(0));
-
-        }catch  (BinanceDexApiException e) {
-            logger.warn(e.getError());
-            throw e;
-        }
-    }
-
-    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*Quantity:Zero.*")
-    public void testNewOrderZeroAmount() throws IOException, NoSuchAlgorithmException{
+    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*does not belong to transaction sender.*")
+    public void testCancelOthersOrder() throws IOException, NoSuchAlgorithmException{
 
         String symbol = "ADA.B-F2F_BNB";
-        NewOrder no = new NewOrder();
-        no.setTimeInForce(TimeInForce.GTE);
-        no.setOrderType(OrderType.LIMIT);
-        no.setSide(OrderSide.BUY);
-        no.setPrice("0.0042");
-        no.setQuantity("0");
-        no.setSymbol(symbol);
+        CancelOrder co = new CancelOrder();
+        co.setSymbol(symbol);
+        co.setRefId("8672775CD0C8EA51364B5231FD9A63893B55FF82-22");
 
-        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
         try {
-            List<TransactionMetadata> resp = client.newOrder(no, wallet, options, true);
+            List<TransactionMetadata> resp = client.cancelOrder(co, toWallet, TransactionOption.DEFAULT_INSTANCE, true);
             logger.info(resp.get(0));
-
         }catch  (BinanceDexApiException e) {
             logger.warn(e.getError());
             throw e;
         }
     }
 
-    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*Price:Zero.*")
-    public void testNewOrderZeroPrice() throws IOException, NoSuchAlgorithmException{
+    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*Failed to find order.*")
+    public void testCancelNonExistOrder() throws IOException, NoSuchAlgorithmException{
 
         String symbol = "ADA.B-F2F_BNB";
-        NewOrder no = new NewOrder();
-        no.setTimeInForce(TimeInForce.GTE);
-        no.setOrderType(OrderType.LIMIT);
-        no.setSide(OrderSide.BUY);
-        no.setPrice("0");
-        no.setQuantity("1.0");
-        no.setSymbol(symbol);
+        CancelOrder co = new CancelOrder();
+        co.setSymbol(symbol);
+        co.setRefId("8672775CD0C8EA51364B5231FD9A63893B55FF82-23");
 
-        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
         try {
-            List<TransactionMetadata> resp = client.newOrder(no, wallet, options, true);
+            List<TransactionMetadata> resp = client.cancelOrder(co, wallet, TransactionOption.DEFAULT_INSTANCE, true);
             logger.info(resp.get(0));
-
         }catch  (BinanceDexApiException e) {
             logger.warn(e.getError());
             throw e;
         }
     }
 
-    //todo
-    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*trading pair not found.*")
-    public void testNewOrderNoExitPair() throws IOException, NoSuchAlgorithmException{
-
-        String symbol = "ADA.B-F_BNB";
-
-        NewOrder no = new NewOrder();
-        no.setTimeInForce(TimeInForce.GTE);
-        no.setOrderType(OrderType.LIMIT);
-        no.setSide(OrderSide.BUY);
-        no.setPrice("0.0042");
-        no.setQuantity("1.0");
-        no.setSymbol(symbol);
-
-        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
-        try {
-            List<TransactionMetadata> resp = client.newOrder(no, wallet, options, true);
-            logger.info(resp.get(0));
-
-        }catch  (BinanceDexApiException e) {
-            logger.warn(e.getError());
-            throw e;
-        }
-    }
-
-    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*Price:Zero/Negative Number.*")
-    public void testNewOrderNegativePrice() throws IOException, NoSuchAlgorithmException{
-
-        String symbol = "ADA.B-F2F_BNB";
-
-        NewOrder no = new NewOrder();
-        no.setTimeInForce(TimeInForce.GTE);
-        no.setOrderType(OrderType.LIMIT);
-        no.setSide(OrderSide.BUY);
-        no.setPrice("-0.0042");
-        no.setQuantity("1.0");
-        no.setSymbol(symbol);
-
-        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
-        try {
-            List<TransactionMetadata> resp = client.newOrder(no, wallet, options, true);
-            logger.info(resp.get(0));
-
-        }catch  (BinanceDexApiException e) {
-            logger.warn(e.getError());
-            throw e;
-        }
-    }
-
-    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*do not have enough token to lock.*")
-    public void testNewOrderLargePrice() throws IOException, NoSuchAlgorithmException{
-
-        String symbol = "ADA.B-F2F_BNB";
-
-        NewOrder no = new NewOrder();
-        no.setTimeInForce(TimeInForce.GTE);
-        no.setOrderType(OrderType.LIMIT);
-        no.setSide(OrderSide.BUY);
-        no.setPrice("92233720368");
-        no.setQuantity("1");
-        no.setSymbol(symbol);
-
-        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
-        try {
-            List<TransactionMetadata> resp = client.newOrder(no, wallet, options, true);
-            logger.info(resp.get(0));
-
-        }catch  (BinanceDexApiException e) {
-            logger.warn(e.getError());
-            throw e;
-        }
-    }
-
-    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*do not have enough token to lock.*")
-    public void testNewOrderLargeAmount() throws IOException, NoSuchAlgorithmException{
-
-        String symbol = "ADA.B-F2F_BNB";
-
-        NewOrder no = new NewOrder();
-        no.setTimeInForce(TimeInForce.GTE);
-        no.setOrderType(OrderType.LIMIT);
-        no.setSide(OrderSide.BUY);
-        no.setPrice("0.0042");
-        no.setQuantity("92233720368");
-        no.setSymbol(symbol);
-
-        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
-        try {
-            List<TransactionMetadata> resp = client.newOrder(no, wallet, options, true);
-            logger.info(resp.get(0));
-
-        }catch  (BinanceDexApiException e) {
-            logger.warn(e.getError());
-            throw e;
-        }
-    }
-    //todo
-//    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*do not have enough token to lock.*")
     @Test
-    public void testNewOrderFromOthers() throws IOException, NoSuchAlgorithmException{
+    public void testCancelOrderNonEnoughFee() throws IOException, NoSuchAlgorithmException{
 
         String symbol = "ADA.B-F2F_BNB";
+        CancelOrder co = new CancelOrder();
+        co.setSymbol(symbol);
+        co.setRefId("B3882888FA65475142C94E352EF67C384984A316-9");
 
-        NewOrder no = new NewOrder();
-        no.setTimeInForce(TimeInForce.GTE);
-        no.setOrderType(OrderType.LIMIT);
-        no.setSide(OrderSide.BUY);
-        no.setPrice("0.0042");
-        no.setQuantity("12");
-        no.setSymbol(symbol);
-
-        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
         try {
-            List<TransactionMetadata> resp = client.newOrder(no, wallet, options, true);
+            List<TransactionMetadata> resp = client.cancelOrder(co, toWallet, TransactionOption.DEFAULT_INSTANCE, true);
             logger.info(resp.get(0));
-
         }catch  (BinanceDexApiException e) {
             logger.warn(e.getError());
             throw e;
         }
     }
 
-    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*do not have enough token to lock.*")
-    public void testNewOrderMoreThanHave() throws IOException, NoSuchAlgorithmException{
-
-        String symbol = "ADA.B-F2F_BNB";
-
-        NewOrder no = new NewOrder();
-        no.setTimeInForce(TimeInForce.GTE);
-        no.setOrderType(OrderType.LIMIT);
-        no.setSide(OrderSide.SELL);
-        no.setPrice("0.0042");
-        no.setQuantity("120");
-        no.setSymbol(symbol);
-
-        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
-        try {
-            List<TransactionMetadata> resp = client.newOrder(no, toWallet, options, true);
-            logger.info(resp.get(0));
-
-        }catch  (BinanceDexApiException e) {
-            logger.warn(e.getError());
-            throw e;
-        }
-    }
-
-    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*quantity.* is not rounded to lotSize.*")
-    public void testNewOrderNotRoundQuantity() throws IOException, NoSuchAlgorithmException{
-
-        String symbol = "ADA.B-F2F_BNB";
-
-        NewOrder no = new NewOrder();
-        no.setTimeInForce(TimeInForce.GTE);
-        no.setOrderType(OrderType.LIMIT);
-        no.setSide(OrderSide.BUY);
-        no.setPrice("0.0042");
-        no.setQuantity("0.1");
-        no.setSymbol(symbol);
-
-        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
-        try {
-            List<TransactionMetadata> resp = client.newOrder(no, toWallet, options, true);
-            logger.info(resp.get(0));
-
-        }catch  (BinanceDexApiException e) {
-            logger.warn(e.getError());
-            throw e;
-        }
-    }
-
-    @Test(expectedExceptions = BinanceDexApiException.class, expectedExceptionsMessageRegExp = ".*Price:Zero/Negative Number.*")
-    public void testNewOrderNotRoundPrice() throws IOException, NoSuchAlgorithmException{
-
-        String symbol = "ADA.B-F2F_BNB";
-
-        NewOrder no = new NewOrder();
-        no.setTimeInForce(TimeInForce.GTE);
-        no.setOrderType(OrderType.LIMIT);
-        no.setSide(OrderSide.BUY);
-        no.setPrice("0.000000009");
-        no.setQuantity("1");
-        no.setSymbol(symbol);
-
-        TransactionOption options = TransactionOption.DEFAULT_INSTANCE;
-        try {
-            List<TransactionMetadata> resp = client.newOrder(no, toWallet, options, true);
-            logger.info(resp.get(0));
-
-        }catch  (BinanceDexApiException e) {
-            logger.warn(e.getError());
-            throw e;
-        }
-    }
 }
+
